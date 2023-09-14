@@ -459,6 +459,7 @@ class DDMReg_dMRI_TOMs_reorient_mem(LoadableModel):
             return (y_source, y_target, preint_flow, y_sourceTOMs, y_targetTOMs, y_sourceSegs, y_targetSegs) \
                 if self.bidir else (y_source, preint_flow, y_sourceTOMs, y_sourceSegs)
         else:  # prediction
+            print(pos_flow.shape)
             return y_source, pos_flow, y_sourceTOMs, y_sourceSegs
 
 

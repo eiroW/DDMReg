@@ -60,14 +60,15 @@ def load_volfile(
     if filename.endswith(('.nii', '.nii.gz', '.mgz')):
         import nibabel as nib
         img = nib.load(filename)
-        vol = img.get_data()
+        vol = np.squeeze(img.dataobj)
         affine = img.affine
+        
         if len(vol.shape) == 5:# tenor.nii.gz
             vol = np.squeeze(vol)
             vol = np.transpose(vol, [3, 0, 1, 2])
-            vol = minmax_normalization_tensor(vol, tensor_norm)
+            vol = minmax_normalization(vol, tensor_norm)
         if len(vol.shape) == 4 and vol.shape[0] == 9:# perks.nii.gz
-            vol = minmax_normalization_peaks(vol, tensor_norm)
+            vol = minmax_normalization(vol, tensor_norm)
     elif filename.endswith('.npy'):
         vol = np.load(filename)
         affine = None
@@ -90,7 +91,7 @@ def load_volfile(
 
     if normalize:
         if nb_eig == 6:
-            vol = minmax_normalization_tensor(vol)
+            vol = minmax_normalization(vol)
         else:
             vol = minmax_normalization(vol)
 

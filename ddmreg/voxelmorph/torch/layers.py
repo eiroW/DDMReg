@@ -79,15 +79,16 @@ class TOMReorientation(nn.Module):
         # new locations
         grid_torch = self.grid.to(flow.device) + flow
 
-        J_torch = torch.gradient(grid_torch)
-        dx = J_torch[2]
-        dy = J_torch[3]
-        dz = J_torch[4]
-
+        J_torch = torch.vmap(torch.gradient)(grid_torch)
+        dx = J_torch[1]
+        dy = J_torch[2]
+        dz = J_torch[3]
+        print(dx.shape)
         del grid_torch, J_torch
 
         JacMat_torch = torch.cat((dx, dy, dz), axis=0).permute(2, 3, 4, 1, 0)
-        JacMat_torch = torch.reshape(JacMat_torch, (self.size[0] * self.size[1] * self.size[2], 3, 3))
+        print(JacMat_torch.shape)
+        JacMat_torch = torch.reshape(JacMat_torch, (-1, 3, 3))
 
         del dx, dy, dz
 
@@ -110,7 +111,7 @@ class TOMReorientation(nn.Module):
         # from torch_batch_svd import svd
         # U, _, V = svd(JacMat_torch)
 
-        RMat_svd_torch = torch.bmm(U, torch.transpose(V, 1, 2))
+        RMat_svd_torch = torch.matmul(U, torch.transpose(V, 1, 2))
         RMat_svd_torch = torch.transpose(RMat_svd_torch, 1, 2)
 
         del U, V
@@ -156,14 +157,15 @@ class Transform_SVD(nn.Module):
         # new locations
         grid_torch = self.grid.to(flow.device) + flow
 
-        J_torch = torch.gradient(grid_torch)
-        dx = J_torch[2]
-        dy = J_torch[3]
-        dz = J_torch[4]
-
+        J_torch = torch.vmap(torch.gradient(grid_torch))
+        dx = J_torch[1]
+        dy = J_torch[2]
+        dz = J_torch[3]
+        print(dx.shape)
         del grid_torch, J_torch
 
         JacMat_torch = torch.cat((dx, dy, dz), axis=0).permute(2, 3, 4, 1, 0)
+        print(JacMat_torch.shape)
         JacMat_torch = torch.reshape(JacMat_torch, (self.size[0] * self.size[1] * self.size[2], 3, 3))
 
         del dx, dy, dz
